@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  django-app:
+    build: '.'
+    # network_mode: 'host'
+    env_file:
+      - 'yolo_backend/.env'
+    ports:
+      - '8000:8000'
