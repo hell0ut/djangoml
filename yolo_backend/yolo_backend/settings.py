@@ -20,7 +20,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'))
-MODEL = torch.hub.load('ultralytics/yolov5', 'custom', path=os.path.join(BASE_DIR,'mlapp/model/best.pt'))
+MODEL = torch.hub.load('ultralytics/yolov5', 'custom', path=os.getenv('WEIGHTS_LINK'))
 MODEL.cpu()
 S3 = boto3.client('s3')
 
