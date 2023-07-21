@@ -1,3 +1,7 @@
 myenv/
 .myenv/
 __pycache__/
+*.ipynb
+*.env
+.env
+*/.env
