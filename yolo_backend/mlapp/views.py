@@ -8,6 +8,7 @@ import time
 from django.conf import settings
 from PIL import Image
 import io
+import torch
 
 
 def upload_image_to_s3(image_file,file_name):
@@ -33,26 +34,35 @@ def pillow_process_image(image_file):
 
 
 def process_image_view(request):
-    if request.method == 'POST' and request.FILES.get('image'):
+    if request.method == 'POST':
+        for file_obj_key in request.FILES.keys():
+            file_obj = request.FILES[file_obj_key]
+            break
         request_received_date = datetime.datetime.now()
-        new_file_name = f'{time.time()}{request.FILES["image"].name}'
-        processed_image,width,height,img_to_predict = pillow_process_image(request.FILES['image'])
+        new_file_name = f'{time.time()}{file_obj.name}'
+        processed_image,width,height,img_to_predict = pillow_process_image(file_obj)
         url = upload_image_to_s3(processed_image,new_file_name)
-        res = settings.MODEL(img_to_predict)
+        #model = torch.hub.load('ultralytics/yolov5', 'custom', path=os.getenv('WEIGHTS_LINK'))
+        #model.cpu()
+        model = MlappConfig.model
+        res = model(img_to_predict)
         request_processed_date = datetime.datetime.now()
-        print('URL ',url)
         jpeg_image = io.BytesIO()
         Image.fromarray(res.render()[0]).save(jpeg_image,format='JPEG')
         url_pred = upload_image_to_s3(jpeg_image.getvalue(),'pred'+new_file_name)
-        print('URL_PRED', url_pred)
-        pred_label = ' '.join(res.crop(save=False)[0]['label'].split(' ')[:-1])
-        image_prediction = ImagePrediction(image_link = url,
-                                           prediction_results=url_pred,
-                                           request_start_date= request_received_date,
-                                           request_end_date = request_processed_date,
-                                           image_width = width,
-                                           image_height = height,
-                                           predicted_label=pred_label)
+        pred_label = '<<<<ERROR OCCURED>>>>'
+        try:
+            pred_label = ' '.join(res.crop(save=False)[0]['label'].split(' ')[:-1])
+        except:
+            return JsonResponse({'error': '<<<<ERROR OCCURED>>>>. No found on image'}, status=401)
+        finally:
+            image_prediction = ImagePrediction(image_link = url,
+                                            prediction_results=url_pred,
+                                            request_start_date= request_received_date,
+                                            request_end_date = request_processed_date,
+                                            image_width = width,
+                                            image_height = height,
+                                            predicted_label=pred_label)
         image_prediction.save()
         return JsonResponse({'message': 'Image processed successfully','result':pred_label})
     else:
