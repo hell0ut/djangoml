@@ -16,9 +16,10 @@ RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 RUN pip3 install -r https://raw.githubusercontent.com/ultralytics/yolov5/master/requirements.txt
 RUN pip3 install -r requirements.txt
-
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 COPY yolo_backend/ .
 
 LABEL maintainer="Vladyslav Poplavskyi <vlad.poplavskyi@gmail.com>"
 
-CMD ./scripts/start_fixed.sh 
+CMD ./scripts/start_fixed.sh
