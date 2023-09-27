@@ -3,6 +3,7 @@ import os
 import torch
 import requests
 import json
+import pandas as pd
 
 
 class MlappConfig(AppConfig):
@@ -17,14 +18,15 @@ class MlappConfig(AppConfig):
 
     if response.status_code == 200:
         data = json.loads(response.text)
-
         for category in data["categories"]:
-            name = category["name"]
-            id = category["id"]
-            result_dict[name] = id
+            result_dict[category["name"]] = category["id"]
 
-    else:
-        print(f"Failed to download the JSON file. Status code: {response.status_code}")
+    s3_bucket_url_for_comparison = "https://qartsweightsbucketopen.s3.eu-west-3.amazonaws.com/compare.csv"
+    df=pd.read_csv(s3_bucket_url_for_comparison)
+
+
+    # else:
+    #     print(f"Failed to download the JSON file. Status code: {response.status_code}")
 
 
         

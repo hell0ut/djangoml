@@ -52,11 +52,13 @@ def process_image_view(request):
         url_pred = upload_image_to_s3(jpeg_image.getvalue(),'pred'+new_file_name)
         pred_label = '<<<<ERROR OCCURED>>>>'
         pred_id = -1
+        id_db = -1
         try:
             pred_label = ' '.join(res.crop(save=False)[0]['label'].split(' ')[:-1])
             pred_id = MlappConfig.result_dict[pred_label]
+            id_db = MlappConfig.df[MlappConfig.df['id_x']==int(pred_id)].iloc[0].id_y
         except:
-            return JsonResponse({'error': '<<<<ERROR OCCURED>>>>. No class found on image'}, status=401)
+            pass
         finally:
             image_prediction = ImagePrediction(image_link = url,
                                             prediction_results=url_pred,
@@ -65,8 +67,8 @@ def process_image_view(request):
                                             image_width = width,
                                             image_height = height,
                                             predicted_label=pred_label)
-        image_prediction.save()
-        return JsonResponse({'message': 'Image processed successfully','result_id':pred_id})
+            image_prediction.save()
+        return JsonResponse({'message': 'Image processed successfully','predicted_label':pred_label,'predicted_id_nn':pred_id,'predicted_id_db_admin':id_db})
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
     

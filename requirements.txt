@@ -85,3 +85,4 @@ tzdata==2023.3
 ultralytics==8.0.138
 urllib3==1.26.16
 wcwidth==0.2.6
+pandas
