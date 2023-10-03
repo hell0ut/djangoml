@@ -56,7 +56,7 @@ def process_image_view(request):
         try:
             pred_label = ' '.join(res.crop(save=False)[0]['label'].split(' ')[:-1])
             pred_id = MlappConfig.result_dict[pred_label]
-            id_db = MlappConfig.df[MlappConfig.df['id_x']==int(pred_id)].iloc[0].id_y
+            id_db = int(MlappConfig.df[MlappConfig.df['id_x']==int(pred_id)].iloc[0].id_y)
         except:
             pass
         finally:
